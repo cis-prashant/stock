@@ -1,0 +1,504 @@
+<c-row>
+    <c-col xs="12">
+        <c-card class="mb-3">
+            <c-card-header ngPreserveWhitespaces>
+                <strong>Angular Tabs</strong> <small>underline</small>
+                <a class="float-end me-1 btn-sm btn btn-primary ng-star-inserted" routerLink="/createOptionStrategy">Create</a>
+            </c-card-header>
+            <c-card-body>
+                
+                <c-nav variant="tabs">
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="0" cNavLink>
+                            <svg cIcon class="me-2" name="cilHome"></svg>
+                            List
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="1" cNavLink disabled>
+                            <svg cIcon class="me-2" name="cilUser"></svg>
+                            View/Update
+                        </a>
+                    </c-nav-item>
+                </c-nav>
+                <c-tab-content #tabContent1="cTabContent" [activeTabPaneIdx]="activePane" cRounded="bottom"
+                    (activeTabPaneIdxChange)="onTabChange($event)">
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ticker</th>
+                                    <th scope="col">All Nodes</th>
+                                    <th scope="col">Is Active</th>
+                                    <th scope="col">Created At</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of records
+                                  | paginate
+                                    : {
+                                        itemsPerPage: tableSize,
+                                        currentPage: page,
+                                        totalItems: count
+                                      };
+                                let i = index">
+                                    <td><span role="button" class="badge ms-auto badge-sm bg-primary"
+                                            (click)="viewTicker(row.parent)">{{row.ticker}}</span>
+                                    </td>
+                                    <td>
+                                        <ng-container
+                                            *ngFor="let child of separateChilds(nodeMap.get(row.parent).childs)">
+                                            <ng-container *ngIf="child.type === 0; else successOrDanger">
+                                                <span role="button" class="badge ms-1 badge-sm bg-warning"
+                                                    (click)="viewTicker(child.node)">
+                                                    {{ child.name }}
+                                                </span>
+                                            </ng-container>
+                                            <ng-template #successOrDanger>
+                                                <ng-container *ngIf="child.type === 1; else danger">
+                                                    <span role="button" class="badge ms-1 badge-sm bg-success"
+                                                        (click)="viewTicker(child.node)">
+                                                        {{ child.name }}
+                                                    </span>
+                                                </ng-container>
+                                                <ng-template #danger>
+                                                    <span role="button" class="badge ms-1 badge-sm bg-danger"
+                                                        (click)="viewTicker(child.node)">
+                                                        {{ child.name }}
+                                                    </span>
+                                                </ng-template>
+                                            </ng-template>
+                                        </ng-container>
+                                    </td>
+                                    <td [innerHtml]="getStatus(row.is_active)"></td>
+                                    <td>{{row.created_at |date}}</td>
+                                    <td>@mdo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <pagination-controls previousLabel="Prev" nextLabel="Next"
+                            (pageChange)="onTableDataChange($event)">
+                        </pagination-controls>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+
+                        <strong>All Nodes : </strong>
+                        <ng-container *ngFor="let child of separateChilds(linkedNode); let i = index">
+                            <ng-container *ngIf="child.type === 0; else successOrDanger">
+                                <span role="button" class="badge ms-1 badge-sm bg-warning"
+                                    (click)="viewTicker(child.node)">
+                                    <fa-icon *ngIf="currentNode == child.node" [icon]="faHandPointRight"></fa-icon>
+                                    {{ child.name }}
+                                </span>
+                            </ng-container>
+                            <ng-template #successOrDanger>
+                                <ng-container *ngIf="child.type === 1; else danger">
+                                    <span role="button" class="badge ms-1 badge-sm bg-success"
+                                        (click)="viewTicker(child.node)">
+                                        <fa-icon *ngIf="currentNode == child.node" [icon]="faHandPointRight"></fa-icon>
+                                        {{ child.name }}
+                                    </span>
+                                </ng-container>
+                                <ng-template #danger>
+                                    <span role="button" class="badge ms-1 badge-sm bg-danger"
+                                        (click)="viewTicker(child.node)">
+                                        <fa-icon *ngIf="currentNode == child.node" [icon]="faHandPointRight"></fa-icon>
+                                        {{ child.name }}
+                                    </span>
+                                </ng-template>
+                            </ng-template>
+                        </ng-container>
+
+                        <form cForm [formGroup]="optionUpdateForm!">
+                            <input type="hidden" value="" name="id">
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Parent<span class="text-danger">*</span></label>
+                                        <input type="text" id="ticker" name="ticker"
+                                            class="form-control form-control-sm" formControlName="ticker">
+                                        <input type="hidden" id="parent_id" formControlName="parent" readonly=""
+                                            class="form-control form-control-sm">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-none" id="childDiv">
+                                    <div class="form-group">
+                                        <label class="control-label">Child<span class="text-danger">*</span></label>
+                                        <input type="text" name="child" class="form-control form-control-sm">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Current Stock Price<span
+                                                class="req">*</span></label>
+                                        <input type="text" id="price" formControlName="stock_price"
+                                            class="form-control form-control-sm numbersOnly" value="94">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3">
+                                    <label class="control-label">Risk-free Rate<span class="req">*</span></label>
+                                    <c-input-group _ngcontent-vma-c185="" sizing="sm"
+                                        class="mb-3 input-group input-group-sm"><input formControlName="risk_free_rate"
+                                            aria-describedby="inputGroup-sizing-sm" aria-label="Sizing example input"
+                                            cformcontrol="" type="text" class="form-control"><span cinputgrouptext=""
+                                            id="inputGroup-sizing-sm" class="input-group-text">%</span>
+                                    </c-input-group>
+                                </div>
+
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Days From Today<span class="req">*</span></label>
+                                        <input type="number" min="0" id="days_from_today"
+                                            formControlName="days_from_today"
+                                            class="form-control form-control-sm numbersOnly" value="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Interval By Default<span
+                                                class="req">*</span></label>
+                                        <input type="number" value="4" id="interval" formControlName="interval"
+                                            class="form-control form-control-sm numbersOnly">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Start Date<span class="req">*</span></label>
+                                        <input type="date" value="2022-11-02" id="start_date"
+                                            formControlName="start_date"
+                                            class="form-control form-control-sm numbersOnly">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Realized P/L<span class="req">*</span></label>
+                                        <input type="text" value="0" id="cash" formControlName="cash"
+                                            class="form-control form-control-sm numbersOnly">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Is Active<span class="req">*</span></label>
+                                        <select formControlName="active" class="form-control form-control-sm">
+                                            <option value="0">Non Active</option>
+                                            <option value="1">Active</option>
+                                            <option value="2" selected="">Expired</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3" style="margin-left: 15%;">
+                                    <div class="form-group">
+                                        <label class="control-label">Cash In Hand</label>
+                                        <input type="text" class="form-control form-control-sm" id="cash_in_hand"
+                                            formControlName="cash_in_hand" value="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3" style="margin-left: 0%;">
+                                    <div class="form-group">
+                                        <label class="control-label">Current Trade Cost <i
+                                                style="font-size: 13px !important;" class="fa fa-info-circle pointer"
+                                                aria-hidden="true" data-toggle="tooltip" data-placement="top" title=""
+                                                data-original-title="Parrent ITC + Extra Cash"></i></label>
+                                        <input type="text" class="form-control form-control-sm" id="currentTradeCost"
+                                            formControlName="parentTradeCost">
+                                        <input type="hidden" id="parentTradeCost" value="22793.8">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3" style="margin-left: 0%;">
+                                    <div class="form-group">
+                                        <label class="control-label">Extra Cash<span class="req">*</span></label>
+                                        <input type="text" value="0" id="extra_cash" formControlName="extra_cash"
+                                            class="form-control form-control-sm numbersOnly">
+                                    </div>
+                                </div>
+                                <div id="spreadDiv">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="mt-3 mt-3 overflow-auto">
+                                    <table id="portfolio_table"
+                                        class="table table-sm table-bordered table-striped table-hover results_table options_strategy_table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">SN</th>
+                                                <th scope="col">Buy/Sell</th>
+                                                <th scope="col">Contract</th>
+                                                <th scope="col">Call/Put/ Stock</th>
+                                                <th scope="col">Strike<span class="req">*</span></th>
+                                                <th scope="col">Days to Expiry<span class="req">*</span></th>
+                                                <th scope="col">Volatility %<span class="req">*</span></th>
+                                                <th scope="col"
+                                                    title="The premium per option, or price per stock that you buy / sell.">
+                                                    Premium</th>
+                                                <th scope="col"
+                                                    title="The net amount of money that you pay (the amount is negative in this case) or receive (the amount is positive then) when you buy / sell an option or a stock.">
+                                                    Debit/Credit</th>
+                                                <th scope="col">Initial Trade Cost</th>
+                                                <th scope="col">Cash Required</th>
+                                                <th scope="col">Initial Cash Req.</th>
+                                                <th scope="col">&nbsp;</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="octbody">
+                                            <tr *ngFor="let position of positions.getEntries(); let i = index;"
+                                                id="{{position.value.row_id}}" class="pos">
+                                                <td>
+                                                    <span class="cnt">{{i+1}}</span>
+                                                    <input type="hidden" [name]="'posid[' + position.value.row_id + ']'"
+                                                        [value]="position.value.id">
+                                                    <input type="hidden" name="row_id[{{position.value.row_id}}]"
+                                                        [value]="position.value.row_id ?? ''">
+                                                    <input type="checkbox" name="poschk[{{position.value.row_id}}]"
+                                                        class="poschk">
+                                                </td>
+                                                <td>
+                                                    <select [name]="'buysell['+position.value.row_id+']'"
+                                                        id="buysell-{{position.value.row_id}}"
+                                                        [value]="position.value.buysell ?? ''">
+                                                        <option value="buy">Buy</option>
+                                                        <option value="sell">Sell</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" [value]="position.value?.contract ?? ''"
+                                                        name="quantity[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm numbersOnly"
+                                                        id="quantity-{{position.value.row_id}}">
+                                                </td>
+                                                <td>
+                                                    <select [value]="position.value.instrument ?? ''"
+                                                        name="instrument[{{position.value.row_id}}]"
+                                                        id="instrument-{{position.value.row_id}}">
+                                                        <option value="c">Call</option>
+                                                        <option value="p">Put</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" [value]="position.value.strike ?? ''"
+                                                        name="strike[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm numbersOnly"
+                                                        id="strike-{{position.value.row_id}}">
+                                                </td>
+                                                <td>
+                                                    <input type="text" [value]="position.value.days_to_expire ?? ''"
+                                                        name="days_to_exp[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm numbersOnly"
+                                                        id="days_to_exp-{{position.value.row_id}}">
+                                                    <input style="width:125px;" type="date"
+                                                        [value]="position.value.expiry_date ?? ''"
+                                                        name="days_to_exp_date[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm date"
+                                                        id="days_to_exp_date-{{position.value.row_id}}">
+                                                </td>
+                                                <td><input type="text" [value]="position.value.volatility ?? ''"
+                                                        name="volatility[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm numbersOnly bold"
+                                                        title="Volatility is fixed. The premium will be calculated."
+                                                        id="volatility-{{position.value.row_id}}"></td>
+                                                <td>
+                                                    <input type="text" [value]="position.value.premium ?? ''"
+                                                        name="premium[{{position.value.row_id}}]"
+                                                        id="premium-{{position.value.row_id}}"
+                                                        class="form-control form-control-sm"
+                                                        title="The premium is calculated with the Black-Scholes model using the entered volatility.">
+                                                </td>
+                                                <td class="dbcr"><span
+                                                        id="dbcr-{{position.value.row_id}}">{{position.value.debit_credit}}</span>
+                                                </td>
+                                                <td><input type="text" name="itci[{{position.value.row_id}}]"
+                                                        [value]="position.value.initial_trade_cost ?? ''"
+                                                        class="form-control form-control-sm"></td>
+                                                <td><input type="text" name="cash_required[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm"
+                                                        [value]="position.value.cash_required ?? ''"></td>
+                                                <td><input type="text" [value]="position.value.initial_cash_req ?? ''"
+                                                        name="initial_cash_required[{{position.value.row_id}}]"
+                                                        class="form-control form-control-sm"></td>
+                                                <td class="removeButtonTd"><button class="btn btn-sm btn-danger"
+                                                        (click)="removePosition(position.value.row_id)">X</button></td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td center="center"><b>Total</b></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td><b id="total"></b></td>
+                                                <td><b id="totalITC"></b></td>
+                                                <td><b id="totalCashReq"></b></td>
+                                                <td><b id="totalICR"></b></td>
+                                                <td><b id="totalICR">&nbsp;</b></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button id="btn_add_position" class="btn btn-link btn-sm"
+                                        (click)="addNewPosition()">
+                                        <i class="fa fa-plus" aria-hidden="true"></i> Add Position
+                                    </button>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="btn_merge_position" class="btn btn-block btn-warning btn-sm pull-right">
+                                        Merge Position
+                                    </button>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" id="submitBtn"
+                                        class="btn btn-block btn-primary btn-sm pull-right">Calculate</button>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" id="updateBtn"
+                                        class="btn btn-block btn-success btn-sm pull-right">Update</button>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="help-block text-danger" id="errSpan"></span>
+                                    <span class="help-block text-success" id="succSpan"></span>
+                                    <span>
+                                        <div class="spinner-border text-primary d-none" id="loading" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-block btn-outline-primary btn-sm"
+                                        id="addChildBtn">Add Child</button>
+
+                                    <button type="submit" id="saveBtn"
+                                        class="btn btn-block btn-success btn-sm pull-right d-none">Save</button>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-block btn-outline-success btn-xs d-none"
+                                        id="saveChildBtn">Save Child</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="row">
+                            <div class="mt-3 mt-3 overflow-auto">
+                                <table class="table table-bordered table-sm text-center">
+                                    <tbody>
+                                        <tr>
+                                            <td>SN</td>
+                                            <ng-container *ngFor="let index of [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]">
+                                                <td class="bg-danger text-light">
+                                                    <span>{{ tableRows?.data?.row1['l' + index ] }}</span>
+                                                    <small class="sml">{{ tableRows?.data?.row4['l' + index ] }}</small>
+                                                </td>
+                                            </ng-container>
+                                            <td class="bg-warning">{{tableRows?.data?.row1?.sp!}}</td>
+                                            <ng-container *ngFor="let index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                                                <td class="bg-success text-light">{{ tableRows?.data?.row1['h' + index ]
+                                                    }}
+                                                    <small class="sml">{{ tableRows?.data?.row4['h' + index ] }}</small>
+                                                </td>
+                                            </ng-container>
+                                        </tr>
+
+                                        <ng-container *ngIf="tableRows?.data?.row11!">
+                                            <ng-container
+                                                *ngFor="let data of getObjectProperties(tableRows.data.row11); let i = index">
+                                                <tr>
+                                                    <td>
+                                                        {{i+1}}
+                                                        <input type="radio" name="tablePosition"
+                                                            (click)="setTableRowSelected($event)" value="{{data.key}}"
+                                                            [checked]="selectedTableRow == data.key" />
+                                                    </td>
+                                                    <ng-container *ngFor="let ix of [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]">
+                                                        <td>
+                                                            <span>{{ data.value['l' + ix ].total | number:'1.2-2'
+                                                                }}</span>
+                                                            <small class="sml">{{tableRows.data.row5[data.key]['l'+ ix]
+                                                                }}%</small>
+                                                        </td>
+                                                    </ng-container>
+                                                    <td>
+                                                        <span>{{ data.value['sp'].total | number:'1.2-2' }}</span>
+                                                        <small class="sml">{{tableRows.data.row5[data.key]['sp'] |
+                                                            number:'1.2-2'
+                                                            }}%</small>
+                                                    </td>
+                                                    <ng-container *ngFor="let ix of [1,2,3,4,5,6,7,8,9,10]">
+                                                        <td>
+                                                            <span>{{ data.value['h' + ix ].total | number:'1.2-2'
+                                                                }}</span>
+                                                            <small class="sml">{{tableRows.data.row5[data.key]['h' + ix]
+                                                                }}%</small>
+                                                        </td>
+                                                    </ng-container>
+                                                </tr>
+                                            </ng-container>
+                                        </ng-container>
+
+                                        <tr>
+                                            <td>
+                                                Net P/L
+                                                <input type="radio" name="tablePosition"
+                                                    (click)="setTableRowSelected($event)" value="netpl"
+                                                    [checked]="selectedTableRow == 'netpl'" />
+                                            </td>
+                                            <ng-container *ngFor="let index of [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]">
+                                                <td>
+                                                    <span>{{ tableRows?.data?.netpl['l' + index ] | number:'1.2-2'
+                                                        }}</span>
+                                                    <small class="sml">{{ tableRows?.data?.netpl['l' + index +
+                                                        'p' ] | number:'1.2-2' }}%</small>
+                                                </td>
+                                            </ng-container>
+                                            <td>
+                                                <span
+                                                    class="d-block">{{tableRows?.data?.netpl?.sp!}}</span><small>{{tableRows?.data?.netpl?.spp!}}%</small>
+                                            </td>
+                                            <ng-container *ngFor="let index of [1,2,3,4,5,6,7,8,9,10]">
+                                                <td>
+                                                    <span>{{ tableRows?.data?.netpl['h' + index ] | number:'1.2-2'
+                                                        }}</span>
+                                                    <small class="sml">{{ tableRows?.data?.netpl['h' + index +
+                                                        'p' ] | number:'1.2-2' }}%</small>
+                                                </td>
+                                            </ng-container>
+                                        </tr>
+                                        <tr>
+                                            <td>NAV<input type="radio" name="tablePosition"
+                                                    (click)="setTableRowSelected($event)" value="nav"
+                                                    [checked]="selectedTableRow == 'nav'" /></td>
+                                            <ng-container *ngFor="let index of [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]">
+                                                <td><small class="sml">{{ tableRows?.data?.row2['l' + index ] |
+                                                        number:'1.2-2' }}</small></td>
+                                            </ng-container>
+                                            <td class="bg-light">{{tableRows?.data?.row2?.sp! | number:'1.2-2'}}</td>
+                                            <ng-container *ngFor="let index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                                                <td><small class="sml">{{ tableRows?.data?.row2['h' + index ] |
+                                                        number:'1.2-2' }}</small></td>
+                                            </ng-container>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <c-chart type="line" [data]="chartBarData"></c-chart>
+                        <div class="row bg-white">
+                            <div id="tree-container" class="tree-container bg-white overflow-scroll" #treeContainer>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+
+                    </c-tab-pane>
+                </c-tab-content>
+            </c-card-body>
+        </c-card>
+    </c-col>
+</c-row>

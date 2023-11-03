@@ -1,0 +1,66 @@
+<div class="bg-light min-vh-100 d-flex flex-row align-items-center">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="8">
+        <c-card-group>
+          <c-card class="p-4">
+            <c-card-body>
+              <form cForm [formGroup]="loginForm!">
+                <h1>Login</h1>
+                <p class="text-medium-emphasis">Sign In to your account</p>
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilUser"></svg>
+                  </span>
+                  <input autoComplete="email" cFormControl formControlName="email" placeholder="Email" />
+                </c-input-group>
+                <div *ngIf="submitted && f?.['email']?.errors" class="text-danger">
+                  <div *ngIf="f?.['email']?.errors?.['required']">Email is required</div>
+                  <div *ngIf="f?.['email']?.errors?.['email']">Enter valid email</div>
+                </div>
+                <c-input-group class="mb-4">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilLockLocked"></svg>
+                  </span>
+                  <input cFormControl autoComplete="current-password" formControlName="password" placeholder="Password"
+                    type="password" />
+                </c-input-group>
+                <div *ngIf="submitted && f?.['password']?.errors" class="text-danger">
+                  <div *ngIf="f?.['email']?.errors?.['required']">Password is required</div>
+                </div>
+                <c-row>
+                  <c-col xs="6">
+                    <button cButton class="px-4" color="primary" (click)="onSubmit($event)">
+                      Login
+                    </button>
+                  </c-col>
+                  <c-col class="text-right" xs="6">
+                    <button cButton class="px-0" color="link">
+                      Forgot password?
+                    </button>
+                  </c-col>
+                </c-row>
+                <div *ngIf="serverErr" class="text-danger">
+                  {{serverErr}}
+                </div>
+              </form>
+            </c-card-body>
+          </c-card>
+          <c-card [ngStyle]="{'width.%': 44}" class="text-white bg-primary py-5">
+            <c-card-body class="text-center">
+              <div>
+                <h2>ERP</h2>
+                <p>
+                  Manage users, blog, academy and many more.
+                </p>
+                <!-- <button [active]="true" cButton class="mt-3" color="primary" routerLink="/register">
+                  Register Now!
+                </button> -->
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-card-group>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

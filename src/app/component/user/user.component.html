@@ -1,0 +1,164 @@
+<c-row>
+    <c-col xs="12">
+        <c-card class="mb-3">
+            <c-card-header ngPreserveWhitespaces>
+                <strong>Manage Users</strong>
+                <button class="btn btn-sm btn-primary float-end" (click)="createNewUser()">Create User</button>
+            </c-card-header>
+            <c-card-body>
+                <c-nav variant="tabs">
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="0" cNavLink>
+                            <svg cIcon class="me-2" name="cilHome"></svg>
+                            List
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="1" cNavLink  [disabled]="true">
+                            <svg cIcon class="me-2" name="cilUser"></svg>
+                            Add/Update
+                        </a>
+                    </c-nav-item>
+                    <!-- <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="2" cNavLink>
+                            <svg cIcon class="me-2" name="cilCode"></svg>
+                            Create
+                        </a>
+                    </c-nav-item> -->
+                </c-nav>
+                <c-tab-content #tabContent1="cTabContent" [activeTabPaneIdx]="activePane" cRounded="bottom"
+                    (activeTabPaneIdxChange)="onTabChange($event)">
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Active</th>
+                                    <th scope="col">Role</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of users
+                                  | paginate
+                                    : {
+                                        itemsPerPage: tableSize,
+                                        currentPage: page,
+                                        totalItems: count
+                                      };
+                                let i = index">
+                                    <td>{{row.name}}</td>
+                                    <td>{{row.email}}</td>
+                                    <td [innerHtml]="getStatus(row.is_active)"></td>
+                                    <td>{{getRole(row.role_id)}}</td>
+                                    <td><button *ngIf="row.role_id != 1" class="btn btn-outline-primary btn-sm"
+                                        (click)="viewUser(row.id)">View/Update</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <pagination-controls previousLabel="Prev" nextLabel="Next"
+                            (pageChange)="onTableDataChange($event)">
+                        </pagination-controls>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form cForm [formGroup]="userForm!">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Name<span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" id="name" name="name"
+                                                    class="form-control form-control-sm" formControlName="name">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Email<span class="req">*</span></label>
+                                                <input type="text" id="email" formControlName="email"
+                                                    class="form-control form-control-sm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Password<span class="req">*</span></label>
+                                                <input type="text" id="password" formControlName="password"
+                                                    class="form-control form-control-sm">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Active<span class="req">*</span></label>
+                                                <select aria-label="Small select " sizing="sm"
+                                                    class="mb-3 form-select form-select-sm" formControlName="is_active">
+                                                    <option [value]="1">Active</option>
+                                                    <option [value]="0">InActive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Role<span class="req">*</span></label>
+                                                <select aria-label="Small select " sizing="sm"
+                                                    class="mb-3 form-select form-select-sm" formControlName="role_id">
+                                                    <option [value]="2">Admin</option>
+                                                    <option [value]="3">User/Staff</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3" *ngIf="userForm?.get('role_id')?.value && userForm?.get('role_id')?.value != 1 && userForm?.get('role_id')?.value != 2">
+                                            <div class="form-group">
+                                                <label class="control-label">Access<span class="req">*</span></label>
+                                                <select aria-label="Small select " sizing="sm"
+                                                    class="mb-3 form-select form-select-sm" formControlName="access" multiple>
+                                                    <option [value]="'Blog'">Blog</option>
+                                                    <option [value]="'Course'">Course</option>
+                                                    <option [value]="'Option Strategy'">Option Strategy</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <button *ngIf="!visibleEdit" type="button"
+                                                    class="mt-4 btn btn-block btn-success btn-sm" id="addUser"
+                                                    (click)="saveUser()">Add User</button>
+                                                <button *ngIf="visibleEdit" type="button"
+                                                    class="mt-4 btn btn-block btn-secondary btn-sm"
+                                                    (click)="cancelUpdate()">Cancel</button>
+                                                <button *ngIf="visibleEdit" type="button"
+                                                    class="ms-1 mt-4 btn btn-block btn-success btn-sm" id="updateUser"
+                                                    (click)="updateUser()">Update
+                                                    User</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <div *ngIf="userSaving" class="text-primary">
+                                                <span>Saving please wait...</span>
+                                            </div>
+                                            <span class="text-danger">
+                                                <ng-container
+                                                    *ngFor="let field of ['name', 'email', 'password', 'role_id']">
+                                                    <div *ngIf="submitted && f?.[field]?.errors" class="text-danger">
+                                                        <div *ngIf="f?.[field]?.errors?.['required']">{{ field |
+                                                            titlecase }} is required!</div>
+                                                    </div>
+                                                </ng-container>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel"></c-tab-pane>
+                </c-tab-content>
+            </c-card-body>
+        </c-card>
+    </c-col>
+</c-row>

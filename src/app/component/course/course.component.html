@@ -1,0 +1,480 @@
+<c-row>
+    <c-col xs="12">
+        <c-card class="mb-3">
+            <c-card-header ngPreserveWhitespaces>
+                <strong>Course Operations</strong>
+            </c-card-header>
+            <c-card-body>
+                <c-nav variant="tabs">
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="0" cNavLink>
+                            <svg cIcon class="me-2" name="cilHome"></svg>
+                            Course Categories
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="1" cNavLink>
+                            <svg cIcon class="me-2" name="cilUser"></svg>
+                            Create Course
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="2" cNavLink>
+                            <svg cIcon class="me-2" name="cilCode"></svg>
+                            Create Chapter
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="3" cNavLink>
+                            <svg cIcon class="me-2" name="cilCode"></svg>
+                            Chapter Listing
+                        </a>
+                    </c-nav-item>
+                    
+                </c-nav>
+                <c-tab-content #tabContent1="cTabContent" [activeTabPaneIdx]="activePane" cRounded="bottom"
+                    (activeTabPaneIdxChange)="onTabChange($event)">
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form cForm [formGroup]="createCategoryForm!">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Category Name<span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" id="name" name="name"
+                                                    class="form-control form-control-sm" formControlName="name">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Heading<span class="req">*</span></label>
+                                                <input type="text" id="heading" formControlName="heading"
+                                                    class="form-control form-control-sm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Meta<span class="req">*</span></label>
+                                                <textarea class="form-control" formControlName="meta"
+                                                    id="meta"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Image</label>
+                                                <input type="file" class="form-control form-control-sm"
+                                                    (change)="onFileSelected($event)" formControlName="img">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Keywords</label>
+                                                <textarea class="form-control" formControlName="keywords"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <button *ngIf="f?.['id']?.value == '' || f?.['id']?.value == undefined" type="button"
+                                                    class="mt-4 btn btn-block btn-success btn-sm" id="addCategory"
+                                                    (click)="saveCategory()">Add Category</button>
+                                                <button *ngIf="f?.['id']?.value != '' && f?.['id']?.value != undefined" type="button"
+                                                    class="mt-4 btn btn-block btn-success btn-sm"
+                                                    id="updateCategory" (click)="updateCategory()">Update Category</button>
+                                                <button *ngIf="f?.['id']?.value != '' && f?.['id']?.value != undefined" type="button"
+                                                    class="ms-1 mt-4 btn btn-block btn-secondary btn-sm" (click)="cancelCategoryUpdate()">Cancel</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-9">
+
+                                            <div *ngIf="catSaving" class="text-primary">
+                                                <span>Saving please wait...</span>
+                                            </div>
+
+                                            <span class="text-danger">
+                                                <div *ngIf="submitted && f?.['name']?.errors" class="text-danger">
+                                                    <div *ngIf="f?.['name']?.errors?.['required']">Name is required!
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="submitted && f?.['url']?.errors" class="text-danger">
+                                                    <div *ngIf="f?.['url']?.errors?.['required']">URL is required!</div>
+                                                </div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <input placeholder="Search by category, heading" class="form-control form-control-sm"
+                                    [(ngModel)]="searchCat">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-sm btn-primary">Search</button>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-sm btn-warning">Reset</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mt-3 mt-3 overflow-auto">
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td scope="col"><strong>SN</strong></td>
+                                            <td scope="col"><strong>Category</strong></td>
+                                            <td scope="col"><strong>Heading</strong></td>
+                                            <td scope="col"><strong>Meta</strong></td>
+                                            <td scope="col" width="200"><strong>Action</strong></td>
+                                        </tr>
+                                        <ng-container *ngIf="categories.length">
+                                            <ng-container *ngFor="let cat of categories; let i = index">
+                                                <tr>
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{cat.name}}</td>
+                                                    <td>{{cat.heading}}</td>
+                                                    <td>{{cat.meta}}</td>
+                                                    <td>
+                                                        <button title="Delete Category" class="btn btn-outline-danger btn-sm"
+                                                        (click)="deleteCategory(cat.id)"><fa-icon
+                                                            [icon]="faDelete"></fa-icon></button>
+                                                        <button title="Edit Category"
+                                                            class="ms-1 btn btn-outline-warning btn-sm"
+                                                            (click)="editCategory(cat.id)"><fa-icon
+                                                                [icon]="faEdit"></fa-icon></button>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <form cForm  [formGroup]="courseForm!">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Name<span class="text-danger">*</span></label>
+                                        <input type="text" name="name" class="form-control form-control-sm"
+                                            formControlName="name">
+                                        <input type="hidden" formControlName="course_category" [value]="selectedCat">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Heading<span class="text-danger">*</span></label>
+                                        <input type="text" name="heading" class="form-control form-control-sm"
+                                            formControlName="heading">
+                                        <input type="hidden" formControlName="course_category" [value]="selectedCat">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Category<span class="text-danger">*</span></label>
+                                        <select formControlName="course_category" class="form-select form-select-sm">
+                                            <option value=""></option>
+                                            <option *ngFor="let cat of categories" value="{{cat.id}}">{{cat.name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Meta<span class="req">*</span></label>
+                                        <textarea class="form-control" formControlName="meta"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Keywords<span class="req">*</span></label>
+                                        <textarea class="form-control" formControlName="keywords"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Image</label>
+                                        <input type="file" class="form-control form-control-sm"
+                                            (change)="onFileSelected($event)" formControlName="image">
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-auto">
+                                    <div class="form-group">
+                                        <button *ngIf="cf?.['id']?.value == '' || cf?.['id']?.value == undefined" class="btn btn-sm btn-success"
+                                             type="button" (click)="submitCourse()">Save</button>
+                                        <button *ngIf="cf?.['id']?.value != '' && cf?.['id']?.value != undefined" class="btn btn-sm btn-success"
+                                             type="button" (click)="updateCourse()">Update</button>
+                                        <button *ngIf="cf?.['id']?.value != '' && cf?.['id']?.value != undefined" class="ms-1  btn btn-sm btn-secondary"
+                                             type="button" (click)="cancelCourseUpdate()">Cancel</button>
+                                        
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div *ngIf="courseSaving" class="text-primary">
+                                        <span>Saving please wait...</span>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="text-danger">
+                                        <ng-container *ngIf="courseSubmit">
+                                          <span *ngIf="cf?.['name']?.errors?.['required']"> Name is required!</span>
+                                          <span *ngIf="cf?.['course_category']?.errors?.['required']"> Category not selected!</span>
+                                          <span *ngIf="cf?.['meta']?.errors?.['required']"> Meta is required!</span>
+                                          <span *ngIf="cf?.['keywords']?.errors?.['required']"> Keywords is required!</span>
+                                          <span *ngIf="cf?.['heading']?.errors?.['required']"> Heading is required!</span>
+                                        </ng-container>
+                                    </span>
+                                    <div [ngClass]="msgClass">
+                                        <span *ngIf="msg">{{msg}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="row">
+                            <div class="mt-3 mt-3 overflow-auto">
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td scope="col"><strong>SN</strong></td>
+                                            <td scope="col"><strong>Course</strong></td>
+                                            <td scope="col"><strong>Slug</strong></td>
+                                            <td scope="col" width="200"><strong>Action</strong></td>
+                                        </tr>
+                                        <ng-container *ngIf="courses.length">
+                                            <ng-container *ngFor="let cat of courses; let i = index">
+                                                <tr>
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{cat.course_name}}</td>
+                                                    <td>{{cat.slug}}</td>
+                                                    <td>
+                                                        <button title="Delete Course" class="btn btn-outline-danger btn-sm"
+                                                        (click)="deleteCourse(cat.id)"><fa-icon [icon]="faDelete"></fa-icon></button>
+                                                        <button title="Edit Course"
+                                                            class="ms-1 btn btn-outline-warning btn-sm" (click)="editCourse(cat.id)">
+                                                            <fa-icon [icon]="faEdit"></fa-icon></button>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form [formGroup]="fileForm!" (ngSubmit)="onSubmit()">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <input class="form-control-sm form-control" type="file"
+                                                (change)="onFileChange($event)" />
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Upload</button>
+                                            <span>{{fileUploadResp}}</span>
+                                        </div>
+                                    </div>
+                                </form>
+                                <form cForm [formGroup]="chapterForm!" enctype="multipart/form-data">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Title<span class="text-danger">*</span></label>
+                                                <input type="text" name="title" class="form-control form-control-sm"
+                                                    formControlName="title">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Heading<span class="text-danger">*</span></label>
+                                                <input type="text" name="heading" class="form-control form-control-sm"
+                                                    formControlName="heading">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Meta<span class="text-danger">*</span></label>
+                                                <textarea class="form-control" formControlName="meta">
+
+                                                </textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Keywords<span class="text-danger">*</span></label>
+                                                <textarea class="form-control" formControlName="keywords">
+
+                                                </textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Image</label>
+                                                <input class="form-control-sm form-control" type="file" (change)="onFileSelected($event)"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Date<span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control form-control-sm" formControlName="date">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Course Category</label>
+                                                <select class="form-select-sm form-select" (change)="onCourseCategoryChange($event)" formControlName="course_category">
+                                                    <option>Select Category</option>
+                                                    <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Course<span class="text-danger">*</span></label>
+                                                <select class="form-select-sm form-select" formControlName="course_id">
+                                                    <option value=""></option>
+                                                    <option *ngFor="let cat of fillCourse" [value]="cat.id">{{cat.course_name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="control-label">Content<span class="text-danger">*</span></label>
+                                                <editor [init]="{
+                                                    base_url: '/tinymce',
+                                                    suffix: '.min',
+                                                    relative_urls : false,
+                                                    remove_script_host : false,
+                                                    document_base_url : 'https://cp3.amassinginvestment.com/'
+                                                  }" [plugins]="'image preview'" formControlName="content"></editor>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <button *ngIf="chf?.['id']?.value == '' || chf?.['id']?.value == undefined" class="btn btn-sm btn-success" (click)="saveChapter()">Add Chapter</button>
+                                            <button *ngIf="chf?.['id']?.value != '' && chf?.['id']?.value != undefined" class="btn btn-sm btn-success"
+                                             type="button" (click)="updateChapter()">Update</button>
+                                            <button *ngIf="chf?.['id']?.value != '' && chf?.['id']?.value != undefined" class="ms-1  btn btn-sm btn-secondary"
+                                             type="button" (click)="cancelChapterUpdate()">Cancel</button>
+                                        </div>
+                                        <div class="col">
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['course_category']?.errors?.['required']">
+                                                Course Category is required!
+                                            </span>
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['course_id']?.errors?.['required']">
+                                                Course is required!
+                                            </span>
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['slug']?.errors?.['required']">
+                                                Slug is required!
+                                            </span>
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['title']?.errors?.['required']">
+                                                Title is required!
+                                            </span>
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['heading']?.errors?.['required']">
+                                                Heading is required!
+                                            </span>
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['content']?.errors?.['required']">
+                                                Content is required!
+                                            </span>
+                                            <span class="text-danger" *ngIf="chapterSubmit && chf?.['date']?.errors?.['required']">
+                                                Date is required!
+                                            </span>
+                                        </div>
+                                        <div class="col-sm-10">
+                                            <span *ngIf="chapterResp" [ngClass]="chapterRespClass">{{chapterResp}}</span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <input placeholder="Search by title, heading" class="form-control form-control-sm" [(ngModel)]="searchCourseStr">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-sm btn-primary" (click)="searchChapter()">Search</button>
+                            </div>
+                            <div class="col-auto">
+                                <span *ngIf="chapterSearchRes" class="text-primary">{{chapterSearchRes}}</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mt-3 mt-3 overflow-auto">
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td scope="col"><strong>SN</strong></td>
+                                            <td scope="col"><strong>Title</strong></td>
+                                            <td scope="col"><strong>Heading</strong></td>
+                                            <td scope="col"><strong>Slug</strong></td>
+                                            <td scope="col" width="300"><strong>Action</strong></td>
+                                        </tr>
+                                        <ng-container *ngIf="filteredCourse.length">
+                                            <ng-container *ngFor="let course of filteredCourse; let i = index">
+                                                <tr>
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{course.title}}</td>
+                                                    <td>{{course.heading}}</td>
+                                                    <td>{{course.slug}}</td>
+                                                    <td>
+                                                        <button class="btn btn-outline-primary btn-sm"
+                                                            (click)="editChapter(course.id)">View/Update</button>
+                                                        <button title="Delete Chapter"
+                                                            class="ms-1 btn btn-outline-danger btn-sm"
+                                                            (click)="deleteChapter(course.id)"><fa-icon
+                                                                [icon]="faDelete"></fa-icon></button>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                </c-tab-content>
+            </c-card-body>
+        </c-card>
+    </c-col>
+</c-row>
+
+<c-modal id="liveDemoModal" [visible]="visible" (visibleChange)="handleLiveDemoChange($event)">
+    <c-modal-header>
+        <h5 cModalTitle>Please Confirm</h5>
+        <button (click)="toggleLiveDemo()" cButtonClose></button>
+    </c-modal-header>
+    <c-modal-body><strong>{{modalMsg}}</strong></c-modal-body>
+    <c-modal-footer>
+        <button (click)="toggleLiveDemo()" cButton color="secondary">
+            Close
+        </button>
+        <button cButton color="danger" (click)="confirmYes(ctype)">YES</button>
+    </c-modal-footer>
+</c-modal>

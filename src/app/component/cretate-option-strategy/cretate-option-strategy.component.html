@@ -1,0 +1,299 @@
+<c-row>
+    <c-col xs="12">
+        <c-card class="mb-3">
+            <c-card-header ngPreserveWhitespaces>
+                <strong>Create Option Strategy</strong>
+                <a class="float-end me-1 btn-sm btn btn-primary ng-star-inserted" routerLink="/optionStrategy">Back To
+                    Option Strategy</a>
+            </c-card-header>
+            <c-card-body>
+                <form cForm [formGroup]="optionCreateForm!">
+                    <input type="hidden" value="" name="id">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Ticker<span class="text-danger">*</span></label>
+                                <input type="text" id="ticker" name="ticker" class="form-control form-control-sm"
+                                    formControlName="ticker">
+                                <input type="hidden" id="ticker" formControlName="ticker" readonly=""
+                                    class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Parent<span class="text-danger">*</span></label>
+                                <input type="text" id="parent" name="parent" class="form-control form-control-sm"
+                                    formControlName="ticker">
+                                <input type="hidden" id="parent" formControlName="parent" readonly=""
+                                    class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-none" id="childDiv">
+                            <div class="form-group">
+                                <label class="control-label">Child<span class="text-danger">*</span></label>
+                                <input type="text" name="child" class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Current Stock Price<span class="req">*</span></label>
+                                <input type="text" id="price" formControlName="stock_price"
+                                    class="form-control form-control-sm numbersOnly" value="94">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <label class="control-label">Risk-free Rate<span class="req">*</span></label>
+                            <c-input-group _ngcontent-vma-c185="" sizing="sm"
+                                class="mb-3 input-group input-group-sm"><input formControlName="risk_free_rate"
+                                    aria-describedby="inputGroup-sizing-sm" aria-label="Sizing example input"
+                                    cformcontrol="" type="text" class="form-control"><span cinputgrouptext=""
+                                    id="inputGroup-sizing-sm" class="input-group-text">%</span>
+                            </c-input-group>
+                        </div>
+
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Days From Today<span class="req">*</span></label>
+                                <input type="number" min="0" id="days_from_today" formControlName="days_from_today"
+                                    class="form-control form-control-sm numbersOnly" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Interval By Default<span class="req">*</span></label>
+                                <input type="number" value="4" id="interval" formControlName="interval"
+                                    class="form-control form-control-sm numbersOnly">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Start Date<span class="req">*</span></label>
+                                <input type="date" value="2022-11-02" id="start_date" formControlName="start_date"
+                                    class="form-control form-control-sm numbersOnly">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Realized P/L<span class="req">*</span></label>
+                                <input type="text" value="0" id="cash" formControlName="cash"
+                                    class="form-control form-control-sm numbersOnly">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Is Active<span class="req">*</span></label>
+                                <select formControlName="active" class="form-select f1orm-control-sm form-select-sm">
+                                    <option value="0">Non Active</option>
+                                    <option value="1">Active</option>
+                                    <option value="2" selected="">Expired</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3" style="margin-left: 15%;">
+                            <div class="form-group">
+                                <label class="control-label">Cash In Hand</label>
+                                <input type="text" class="form-control form-control-sm" id="cash_in_hand"
+                                    formControlName="cash_in_hand" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3" style="margin-left: 0%;">
+                            <div class="form-group">
+                                <label class="control-label">Current Trade Cost <i style="font-size: 13px !important;"
+                                        class="fa fa-info-circle pointer" aria-hidden="true" data-toggle="tooltip"
+                                        data-placement="top" title=""
+                                        data-original-title="Parrent ITC + Extra Cash"></i></label>
+                                <input type="text" class="form-control form-control-sm" id="currentTradeCost"
+                                    formControlName="parentTradeCost">
+                                <input type="hidden" id="parentTradeCost" value="22793.8">
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-3" style="margin-left: 0%;">
+                            <div class="form-group">
+                                <label class="control-label">Extra Cash<span class="req">*</span></label>
+                                <input type="text" value="0" id="extra_cash" formControlName="extra_cash"
+                                    class="form-control form-control-sm numbersOnly">
+                            </div>
+                        </div>
+                        <div id="spreadDiv">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="mt-3 mt-3 overflow-auto">
+                            <table id="portfolio_table"
+                                class="table table-sm table-bordered table-striped table-hover results_table options_strategy_table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">SN</th>
+                                        <th scope="col">Buy/Sell</th>
+                                        <th scope="col">Contract</th>
+                                        <th scope="col">Call/Put/ Stock</th>
+                                        <th scope="col">Strike<span class="req">*</span></th>
+                                        <th scope="col">Days to Expiry<span class="req">*</span></th>
+                                        <th scope="col">Volatility %<span class="req">*</span></th>
+                                        <th scope="col"
+                                            title="The premium per option, or price per stock that you buy / sell.">
+                                            Premium</th>
+                                        <th scope="col"
+                                            title="The net amount of money that you pay (the amount is negative in this case) or receive (the amount is positive then) when you buy / sell an option or a stock.">
+                                            Debit/Credit</th>
+                                        <th scope="col">Initial Trade Cost</th>
+                                        <th scope="col">Cash Required</th>
+                                        <th scope="col">Initial Cash Req.</th>
+                                        <th scope="col">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="octbody">
+                                    <tr *ngFor="let position of positions.getEntries(); let i = index;"
+                                        id="{{position.value.row_id}}" class="pos">
+                                        <td>
+                                            <span class="cnt">{{i+1}}</span>
+                                            <input type="hidden" [name]="'posid[' + position.value.row_id + ']'"
+                                                [value]="position.value.id">
+                                            <input type="hidden" name="row_id[{{position.value.row_id}}]"
+                                                [value]="position.value.row_id ?? ''">
+                                            <input type="checkbox" name="poschk[{{position.value.row_id}}]"
+                                                class="poschk">
+                                        </td>
+                                        <td>
+                                            <select [name]="'buysell['+position.value.row_id+']'"
+                                                id="buysell-{{position.value.row_id}}"
+                                                [value]="position.value.buysell ?? ''">
+                                                <option value="buy">Buy</option>
+                                                <option value="sell">Sell</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" [value]="position.value?.contract ?? ''"
+                                                name="quantity[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm numbersOnly"
+                                                id="quantity-{{position.value.row_id}}">
+                                        </td>
+                                        <td>
+                                            <select [value]="position.value.instrument ?? ''"
+                                                name="instrument[{{position.value.row_id}}]"
+                                                id="instrument-{{position.value.row_id}}">
+                                                <option value="c">Call</option>
+                                                <option value="p">Put</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" [value]="position.value.strike ?? ''"
+                                                name="strike[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm numbersOnly"
+                                                id="strike-{{position.value.row_id}}">
+                                        </td>
+                                        <td>
+                                            <input type="text" [value]="position.value.days_to_expire ?? ''"
+                                                name="days_to_exp[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm numbersOnly"
+                                                id="days_to_exp-{{position.value.row_id}}">
+                                            <input style="width:125px;" type="date"
+                                                [value]="position.value.expiry_date ?? ''"
+                                                name="days_to_exp_date[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm date"
+                                                id="days_to_exp_date-{{position.value.row_id}}">
+                                        </td>
+                                        <td><input type="text" [value]="position.value.volatility ?? ''"
+                                                name="volatility[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm numbersOnly bold"
+                                                title="Volatility is fixed. The premium will be calculated."
+                                                id="volatility-{{position.value.row_id}}"></td>
+                                        <td>
+                                            <input type="text" [value]="position.value.premium ?? ''"
+                                                name="premium[{{position.value.row_id}}]"
+                                                id="premium-{{position.value.row_id}}"
+                                                class="form-control form-control-sm"
+                                                title="The premium is calculated with the Black-Scholes model using the entered volatility.">
+                                        </td>
+                                        <td class="dbcr"><span
+                                                id="dbcr-{{position.value.row_id}}">{{position.value.debit_credit}}</span>
+                                        </td>
+                                        <td><input type="text" name="itci[{{position.value.row_id}}]"
+                                                [value]="position.value.initial_trade_cost ?? ''"
+                                                class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="cash_required[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm"
+                                                [value]="position.value.cash_required ?? ''"></td>
+                                        <td><input type="text" [value]="position.value.initial_cash_req ?? ''"
+                                                name="initial_cash_required[{{position.value.row_id}}]"
+                                                class="form-control form-control-sm"></td>
+                                        <td class="removeButtonTd"><button class="btn btn-sm btn-danger"
+                                                (click)="removePosition(position.value.row_id)">X</button></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td center="center"><strong>Total</strong></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td><b id="total"></b></td>
+                                        <td><b id="totalITC"></b></td>
+                                        <td><b id="totalCashReq"></b></td>
+                                        <td><b id="totalICR"></b></td>
+                                        <td><b id="totalICR">&nbsp;</b></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-auto">
+                            <button id="btn_add_position" class="me-1 btn btn-light ng-star-inserted btn btn-sm"
+                                (click)="addNewPosition()">
+                                <fa-icon [icon]="faPlus"></fa-icon> Add Position
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-block btn-primary btn-sm pull-right"
+                                (click)="calculateOptStrategy()">Calculate</button>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" id="createBtn"
+                                class="btn btn-block btn-success btn-sm pull-right">Create</button>
+                        </div>
+                        <div class="col-auto">
+                            <span class="help-block text-danger" id="errSpan"></span>
+                            <span class="help-block text-success" id="succSpan"></span>
+                            <span>
+                                <div class="spinner-border text-primary d-none" id="loading" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="text-danger" *ngIf="formErr">{{formErr}}</span>
+                            <ng-container
+                                *ngFor="let field of ['ticker', 'stock_price', 'risk_free_rate', 'days_from_today', 'interval', 'start_date', 'cash', 'active', 'cash_in_hand']">
+                                <span *ngIf="submitted && f?.[field]?.errors" class="text-danger">
+                                    <span *ngIf="f?.[field]?.errors?.['required']"> {{ field |
+                                        titlecase }} is required!</span>
+                                </span>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-block btn-outline-primary btn-sm"
+                                id="addChildBtn"><fa-icon [icon]="faPlus"></fa-icon> Add
+                                Child</button>
+
+                            <button type="submit" id="saveBtn"
+                                class="btn btn-block btn-success btn-sm pull-right d-none">Save</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-block btn-outline-success btn-xs d-none"
+                                id="saveChildBtn">Save Child</button>
+                        </div>
+                    </div>
+                </form>
+            </c-card-body>
+        </c-card>
+    </c-col>
+</c-row>

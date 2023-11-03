@@ -1,0 +1,344 @@
+<c-row>
+    <c-col xs="12">
+        <c-card class="mb-3">
+            <c-card-header ngPreserveWhitespaces>
+                <strong>Blog Operations</strong>
+            </c-card-header>
+            <c-card-body>
+                <c-nav variant="tabs">
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="0" cNavLink>
+                            <svg cIcon class="me-2" name="cilHome"></svg>
+                            Blog Categories
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [disabled]="true" [tabPaneIdx]="1" cNavLink>
+                            <svg cIcon class="me-2" name="cilUser"></svg>
+                            Create Blog
+                        </a>
+                    </c-nav-item>
+                    <c-nav-item>
+                        <a [cTabContent]="tabContent1" [routerLink] [tabPaneIdx]="2" cNavLink>
+                            <svg cIcon class="me-2" name="cilCode"></svg>
+                            Blog Listing
+                        </a>
+                    </c-nav-item>
+                </c-nav>
+                <c-tab-content #tabContent1="cTabContent" [activeTabPaneIdx]="activePane" cRounded="bottom"
+                    (activeTabPaneIdxChange)="onTabChange($event)">
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form cForm [formGroup]="createCategoryForm!">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Category<span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" id="name" name="name"
+                                                    class="form-control form-control-sm" formControlName="name">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Heading<span class="req">*</span></label>
+                                                <input type="text" id="heading" formControlName="heading"
+                                                    class="form-control form-control-sm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Meta<span class="req">*</span></label>
+                                                <textarea class="form-control" formControlName="meta"
+                                                    id="meta"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Image</label>
+                                                <input type="file" class="form-control form-control-sm"
+                                                    (change)="onFileSelected($event)" formControlName="img">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Keywords</label>
+                                                <textarea class="form-control" formControlName="keywords"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <button *ngIf="!visibleCatEdit" type="button"
+                                                    class="mt-4 btn btn-block btn-success btn-sm" id="addCategory"
+                                                    (click)="saveCategory()">Add Category</button>
+                                                <button *ngIf="visibleCatEdit" type="button"
+                                                    class="mt-4 btn btn-block btn-secondary btn-sm"
+                                                    (click)="cancelUpdate()">Cancel</button>
+                                                <button *ngIf="visibleCatEdit" type="button"
+                                                    class="ms-1 mt-4 btn btn-block btn-success btn-sm"
+                                                    id="updateCategory" (click)="updateCategory()">Update
+                                                    Category</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-9">
+
+                                            <div *ngIf="catSaving" class="text-primary">
+                                                <span>Saving please wait...</span>
+                                            </div>
+
+                                            <span class="text-danger">
+                                                <div *ngIf="submitted && f?.['name']?.errors" class="text-danger">
+                                                    <div *ngIf="f?.['name']?.errors?.['required']">Name is required!
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="submitted && f?.['url']?.errors" class="text-danger">
+                                                    <div *ngIf="f?.['url']?.errors?.['required']">URL is required!</div>
+                                                </div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <input placeholder="Search by category, heading" class="form-control form-control-sm"
+                                    [(ngModel)]="searchCat">
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-primary" (click)="searchCategory()">Search</button>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-warning" (click)="resetSearchCat()">Reset</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mt-3 mt-3 overflow-auto">
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td scope="col"><strong>SN</strong></td>
+                                            <td scope="col"><strong>Category</strong></td>
+                                            <td scope="col"><strong>Heading</strong></td>
+                                            <td scope="col"><strong>Meta</strong></td>
+                                            <td scope="col" width="200"><strong>Action</strong></td>
+                                        </tr>
+                                        <ng-container *ngIf="categories.length">
+                                            <ng-container *ngFor="let cat of categories; let i = index">
+                                                <tr>
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{cat.name}}</td>
+                                                    <td>{{cat.heading}}</td>
+                                                    <td>{{cat.meta}}</td>
+                                                    <td>
+                                                        <button title="Add Blogs" class="btn btn-outline-success btn-sm"
+                                                            (click)="addBlog(cat.id)"><fa-icon
+                                                                [icon]="faAdd"></fa-icon></button>
+                                                        <button title="View Blogs"
+                                                            class="ms-1 btn btn-outline-primary btn-sm"
+                                                            (click)="listBlogs(cat.id)"><fa-icon
+                                                                [icon]="faEye"></fa-icon></button>
+                                                        <button title="Edit Category"
+                                                            class="ms-1 btn btn-outline-warning btn-sm"
+                                                            (click)="openEditCatModal(cat.id)"><fa-icon
+                                                                [icon]="faEdit"></fa-icon></button>
+                                                        <button title="Delete Category"
+                                                            class="ms-1 btn btn-outline-danger btn-sm"
+                                                            (click)="deleteBlogCat(cat.id)"><fa-icon
+                                                                [icon]="faDelete"></fa-icon></button>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <form [formGroup]="fileForm!" (ngSubmit)="onSubmit()">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <input class="form-control-sm form-control" type="file"
+                                        (change)="onFileChange($event)" />
+                                </div>
+                                <div class="col-sm-8">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Upload</button>
+                                    <span>{{fileUploadResp}}</span>
+                                </div>
+                            </div>
+                        </form>
+                        <form cForm [formGroup]="createBlogForm!" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Title<span class="text-danger">*</span></label>
+                                        <input type="text" id="title" name="title" class="form-control form-control-sm"
+                                            formControlName="title">
+                                        <input type="hidden" formControlName="category_id" [value]="selectedCat">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Heading<span class="text-danger">*</span></label>
+                                        <input type="text" id="heading" name="url" class="form-control form-control-sm"
+                                            formControlName="heading">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Content<span class="text-danger">*</span></label>
+                                        <editor [init]="{
+                                            base_url: '/tinymce',
+                                            suffix: '.min',
+                                            relative_urls : false,
+                                            remove_script_host : false,
+                                            document_base_url : 'https://cp3.amassinginvestment.com/'
+                                          }" [plugins]="'image preview'" formControlName="content"></editor>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Image</label>
+                                        <input type="file" class="form-control form-control-sm" id="image"
+                                            formControlName="image" (change)="onFileSelected($event)" accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Date</label>
+                                        <input type="date" id="date" class="form-control form-control-sm"
+                                            formControlName="date">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Meta</label>
+                                        <textarea class="form-control" formControlName="meta"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Keywords</label>
+                                        <textarea class="form-control" formControlName="keywords"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <button *ngIf="!this.visibleBlogEdit" class="btn btn-sm btn-success"
+                                            (click)="saveBlog()" type="button">Save</button>
+                                        <button *ngIf="this.visibleBlogEdit" class="btn btn-sm btn-secondary"
+                                            (click)="cancelBlogUpdate()" type="button">Cancel</button>
+                                        <button *ngIf="this.visibleBlogEdit" class="ms-1 btn btn-sm btn-success"
+                                            (click)="updateBlog()" type="button">Update</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div *ngIf="blogSaving" class="text-primary">
+                                        <span>Saving please wait...</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="text-danger">
+                                        <div *ngIf="blogSubmit && bf?.['title']?.errors" class="text-danger">
+                                            <div *ngIf="bf?.['title']?.errors?.['required']">Title is required!</div>
+                                        </div>
+                                        <div *ngIf="blogSubmit && bf?.['heading']?.errors" class="text-danger">
+                                            <div *ngIf="bf?.['heading']?.errors?.['required']">Heading is required!
+                                            </div>
+                                        </div>
+                                        <div *ngIf="blogSubmit && bf?.['content']?.errors" class="text-danger">
+                                            <div *ngIf="bf?.['content']?.errors?.['required']">Content is required!
+                                            </div>
+                                        </div>
+                                    </span>
+                                    <div [ngClass]="msgClass">
+                                        <span *ngIf="msg">{{msg}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </c-tab-pane>
+                    <c-tab-pane class="p-3 preview" role="tabpanel">
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <input placeholder="Search by title, heading" class="form-control form-control-sm"
+                                    [(ngModel)]="searchBlog">
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-primary" (click)="searchBlogs()">Search</button>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-warning" (click)="resetSearchBlog()">Reset</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mt-3 mt-3 overflow-auto">
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td scope="col"><strong>SN</strong></td>
+                                            <td scope="col"><strong>Title</strong></td>
+                                            <td scope="col"><strong>Heading</strong></td>
+                                            <td scope="col"><strong>Slug</strong></td>
+                                            <td scope="col" width="300"><strong>Action</strong></td>
+                                        </tr>
+                                        <ng-container *ngIf="blogsArr.length">
+                                            <ng-container *ngFor="let blog of blogsArr; let i = index">
+                                                <tr>
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{blog.title}}</td>
+                                                    <td>{{blog.heading}}</td>
+                                                    <td>{{blog.slug}}</td>
+                                                    <td>
+                                                        <button class="btn btn-outline-primary btn-sm"
+                                                            (click)="viewBlog(blog.id)">View/Update</button>
+                                                        <button title="Delete Blog"
+                                                            class="ms-1 btn btn-outline-danger btn-sm"
+                                                            (click)="deleteBlog(blog.id)"><fa-icon
+                                                                [icon]="faDelete"></fa-icon></button>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </c-tab-pane>
+                </c-tab-content>
+            </c-card-body>
+        </c-card>
+    </c-col>
+</c-row>
+
+<c-modal id="liveDemoModal" [visible]="visible" (visibleChange)="handleLiveDemoChange($event)">
+    <c-modal-header>
+        <h5 cModalTitle>Please Confirm</h5>
+        <button (click)="toggleLiveDemo()" cButtonClose></button>
+    </c-modal-header>
+    <c-modal-body>{{modalMsg}}</c-modal-body>
+    <c-modal-footer>
+        <button (click)="toggleLiveDemo()" cButton color="secondary">
+            Close
+        </button>
+        <button cButton color="danger" (click)="confirmYes(ctype)">YES</button>
+    </c-modal-footer>
+</c-modal>
